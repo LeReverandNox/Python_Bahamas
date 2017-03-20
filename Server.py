@@ -23,6 +23,10 @@ class Server:
         self.hS = None
         self.addrPort = ()
 
+        # Clients and Channels
+        self.clients = {}
+        self.channels = {}
+
         self._gui = self.createGUI()
 
     def createGUI(self):
