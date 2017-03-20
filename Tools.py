@@ -24,7 +24,7 @@ class Tools(metaclass=Singleton):
         if not Tools.isPortAvailable(port):
             pass
 
-        return True
+        return port
 
     def isPortAvailable(port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
