@@ -3,8 +3,9 @@
 
 import tkinter as tk
 import tkinter.messagebox as msgbox
-import threading
+import socket as s
 from Tools import Tools as t
+from Threads.HandleSocket import HandleSocket as hS
 
 class Server:
     def __init__(self):
@@ -19,6 +20,8 @@ class Server:
         # Server
         self.serverSocket = None
         self.status = 'offline'
+        self.hS = None
+        self.addrPort = ()
 
         self._gui = self.createGUI()
 
@@ -118,20 +121,37 @@ class Server:
             return
 
         try:
-            t.isPortValid(self.serverPortVar.get())
+            port = t.isPortValid(self.serverPortVar.get())
         except Exception as e:
             self.displayError(str(e))
         else:
             self.startButton.config(state=tk.DISABLED)
             self.stopButton.config(state=tk.NORMAL)
-            print('On veut run le serveur sur le port {}'.format((self.serverPortVar.get())))
 
+            self.addrPort = ('0.0.0.0', port)
+            self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
+            self.serverSocket.bind(self.addrPort)
+            self.serverSocket.listen(5)
+
+            self.hS = hS(self, self.serverSocket)
+            self.hS.start()
+
+            self.status = 'online'
+            self.updateStatus('The Python_Bahamas Server is currently {} ({}:{})'.format(self.status, *self.addrPort))
 
     def stopServer(self):
         self.cleanError()
+
+        self.hS.stop()
+        self.serverSocket.shutdown(s.SHUT_RDWR)
+        self.serverSocket.close()
+        self.serverSocket = None
+
         self.stopButton.config(state=tk.DISABLED)
         self.startButton.config(state=tk.NORMAL)
-        print('On stoppe le serveur')
+
+        self.status = 'offline'
+        self.updateStatus('The Python_Bahamas Server is currently {}'.format(self.status))
 
     def exitApp(self):
         self._gui.destroy()
