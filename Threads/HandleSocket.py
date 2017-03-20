@@ -1,4 +1,5 @@
 import threading as t
+from Threads.HandleConnection import HandleConnection as hC
 
 class HandleSocket(t.Thread):
     def __init__(self, server, socket):
@@ -13,4 +14,13 @@ class HandleSocket(t.Thread):
         self.isRunning = False
 
     def run(self):
-        print('YOLO ON RUN LE SERVEUR')
+        while self.isRunning:
+            try:
+                clientSocket, clientIp = self.socket.accept()
+            except OSError:
+                pass
+            else:
+                print('{} est maintenant connecté'.format(clientIp))
+                toto = hC(self.server, self.lock, clientSocket)
+                toto.start()
+                # TODO: watch if socket is still alive (ping ?)
