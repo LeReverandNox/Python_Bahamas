@@ -3,18 +3,23 @@
 
 import tkinter as tk
 import tkinter.messagebox as msgbox
-from threading import Thread
+import threading
+from Tools import Tools as t
 
-class Server(Thread):
+class Server:
     def __init__(self):
-        Thread.__init__(self)
+        print(t)
         # Attributes
+        # GUI
         self.statusLabel = None
         self.serverPortVar = None
         self.startButton = None
         self.stopButton = None
 
+        # Server
+        self.serverSocket = None
         self.status = 'offline'
+
         self._gui = self.createGUI()
 
     def createGUI(self):
@@ -78,7 +83,7 @@ class Server(Thread):
 
         # Label and Entry for the server port
         serverPortLabel = tk.Label(commandsLabelFrame, text='Port :')
-        self.serverPortVar = tk.IntVar()
+        self.serverPortVar = tk.StringVar()
         self.serverPortVar.set(4200)
         serverPortEntry = tk.Entry(commandsLabelFrame, textvariable=self.serverPortVar)
         serverPortLabel.grid(row=0, column=0)
@@ -98,10 +103,12 @@ class Server(Thread):
         self._gui.mainloop()
 
     def startServer(self):
+        if self.serverSocket != None:
+            return
+
         self.startButton.config(state=tk.DISABLED)
         self.stopButton.config(state=tk.NORMAL)
-        self.start()
-        print('On veut run le serveur sur le port {}'.format(self.serverPortVar.get()))
+        print('On veut run le serveur sur le port {}'.format(t.castInt(self.serverPortVar.get())))
 
     def stopServer(self):
         self.stopButton.config(state=tk.DISABLED)
