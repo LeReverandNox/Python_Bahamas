@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
+# pylint: disable=line-too-long
 
-from tkinter import *
+import tkinter as tk
 import tkinter.messagebox as msgbox
 from threading import Thread
 
 class Server(Thread):
     def __init__(self):
         Thread.__init__(self)
+        # Attributes
+        self.statusLabel = None
+        self.serverPortVar = None
+        self.startButton = None
+        self.stopButton = None
 
         self.status = 'offline'
         self._gui = self.createGUI()
 
     def createGUI(self):
-        gui = Tk()
+        gui = tk.Tk()
         gui.wm_title('Python_Bahamas Server')
         gui.grid_columnconfigure(0, weight=1)
 
@@ -21,8 +27,8 @@ class Server(Thread):
         gui.config(menu=guiMenubar)
 
         # Create a parent frame to hold the content
-        parentFrame = Frame(gui)
-        parentFrame.grid(padx=25, pady=10, sticky=N+S+W+E)
+        parentFrame = tk.Frame(gui)
+        parentFrame.grid(padx=25, pady=10, sticky='NSWE')
         parentFrame.grid_columnconfigure(0, weight=1)
 
         # Create a frame to hold the server status
@@ -35,7 +41,7 @@ class Server(Thread):
 
     def createMenu(self, gui):
         # Create the main GUI menu, to hold tabs
-        guiMenubar= Menu(gui)
+        guiMenubar= tk.Menu(gui)
 
         # Create and add the File menu
         fileMenu = self.createFileMenu(guiMenubar)
@@ -48,26 +54,42 @@ class Server(Thread):
         return guiMenubar
 
     def createFileMenu(self, menubar):
-        fileMenu = Menu(menubar, tearoff=0)
-        fileMenu.add_command(label='Quit', command=self.exitServer)
+        fileMenu = tk.Menu(menubar, tearoff=0)
+        fileMenu.add_command(label='Quit', command=self.exitApp)
 
         return fileMenu
 
     def createHelpMenu(self, menubar):
-        helpMenu = Menu(menubar, tearoff=0)
+        helpMenu = tk.Menu(menubar, tearoff=0)
         helpMenu.add_command(label='About', command=self.displayAbout)
 
         return helpMenu
 
     def addServerStatus(self, parentFrame):
-        self.statusLabelFrame = LabelFrame(parentFrame, text="Server status", padx=20, pady=20)
-        self.statusLabelFrame.grid(sticky=W+E)
+        statusLabelFrame = tk.LabelFrame(parentFrame, text="Server status", padx=20, pady=20)
+        statusLabelFrame.grid(sticky='WE')
 
-        self.statusLabel = Label(self.statusLabelFrame, text="The Python_Bahamas Server is currently {}".format(self.status))
-        self.statusLabel.grid(row=0, column=0)
+        self.statusLabel = tk.Label(statusLabelFrame, text="The Python_Bahamas Server is currently {}".format(self.status))
+        self.statusLabel.grid()
 
     def addCommandBlock(self, parentFrame):
-        print('Wallah')
+        commandsLabelFrame = tk.LabelFrame(parentFrame, text="Commands", padx=20, pady=20)
+        commandsLabelFrame.grid(sticky='WE')
+
+        # Label and Entry for the server port
+        serverPortLabel = tk.Label(commandsLabelFrame, text='Port :')
+        self.serverPortVar = tk.IntVar()
+        self.serverPortVar.set(4200)
+        serverPortEntry = tk.Entry(commandsLabelFrame, textvariable=self.serverPortVar)
+        serverPortLabel.grid(row=0, column=0)
+        serverPortEntry.grid(row=0, column=1)
+
+        # Buttons to command the server
+        self.startButton = tk.Button(commandsLabelFrame, text='Start', command=self.startServer)
+        self.stopButton = tk.Button(commandsLabelFrame, text='Stop', state=tk.DISABLED, command=self.stopServer)
+        self.startButton.grid(row=0, column=2)
+        self.stopButton.grid(row=0, column=3)
+
 
     def updateStatus(self, message):
         self.statusLabel.config(text=message)
@@ -75,10 +97,18 @@ class Server(Thread):
     def startGUI(self):
         self._gui.mainloop()
 
-    # def startServer(self):
-        # self.start()
+    def startServer(self):
+        self.startButton.config(state=tk.DISABLED)
+        self.stopButton.config(state=tk.NORMAL)
+        self.start()
+        print('On veut run le serveur sur le port {}'.format(self.serverPortVar.get()))
 
-    def exitServer(self):
+    def stopServer(self):
+        self.stopButton.config(state=tk.DISABLED)
+        self.startButton.config(state=tk.NORMAL)
+        print('On stoppe le serveur')
+
+    def exitApp(self):
         self._gui.destroy()
 
     def displayAbout(self):
