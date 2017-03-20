@@ -6,22 +6,30 @@ from threading import Thread
 
 class Server(Thread):
     def __init__(self):
-        self._gui = self.createGUI()
+        Thread.__init__(self)
 
+        self.status = 'offline'
+        self._gui = self.createGUI()
 
     def createGUI(self):
         gui = Tk()
-
         gui.wm_title('Python_Bahamas Server')
+        gui.grid_columnconfigure(0, weight=1)
 
         # Set guiMenubar as the window menu
         guiMenubar = self.createMenu(gui)
         gui.config(menu=guiMenubar)
 
-        # Display the server status
-        self.status = StringVar()
-        self.status.set('offline')
-        self.displayServerStatus(gui)
+        # Create a parent frame to hold the content
+        parentFrame = Frame(gui)
+        parentFrame.grid(padx=25, pady=10, sticky=N+S+W+E)
+        parentFrame.grid_columnconfigure(0, weight=1)
+
+        # Create a frame to hold the server status
+        self.addServerStatus(parentFrame)
+
+        # Create the command block
+        self.addCommandBlock(parentFrame)
 
         return gui
 
@@ -51,15 +59,24 @@ class Server(Thread):
 
         return helpMenu
 
-    def displayServerStatus(self, gui):
-        l = LabelFrame(gui, text="Server status", padx=20, pady=20)
-        l.pack(fill="both", expand="yes")
+    def addServerStatus(self, parentFrame):
+        self.statusLabelFrame = LabelFrame(parentFrame, text="Server status", padx=20, pady=20)
+        self.statusLabelFrame.grid(sticky=W+E)
 
-        Label(l, text="The Python_Bahamas Server is currently").grid(row=0, column=0)
-        Label(l, textvariable=self.status).grid(row=0, column=1)
+        self.statusLabel = Label(self.statusLabelFrame, text="The Python_Bahamas Server is currently {}".format(self.status))
+        self.statusLabel.grid(row=0, column=0)
+
+    def addCommandBlock(self, parentFrame):
+        print('Wallah')
+
+    def updateStatus(self, message):
+        self.statusLabel.config(text=message)
 
     def startGUI(self):
         self._gui.mainloop()
+
+    # def startServer(self):
+        # self.start()
 
     def exitServer(self):
         self._gui.destroy()
