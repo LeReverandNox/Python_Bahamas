@@ -8,10 +8,10 @@ from Tools import Tools as t
 
 class Server:
     def __init__(self):
-        print(t)
         # Attributes
         # GUI
         self.statusLabel = None
+        self.errorLabel = None
         self.serverPortVar = None
         self.startButton = None
         self.stopButton = None
@@ -75,7 +75,10 @@ class Server:
         statusLabelFrame.grid(sticky='WE')
 
         self.statusLabel = tk.Label(statusLabelFrame, text="The Python_Bahamas Server is currently {}".format(self.status))
-        self.statusLabel.grid()
+        self.statusLabel.grid(sticky='W')
+
+        self.errorLabel = tk.Label(statusLabelFrame, text="")
+        self.errorLabel.grid(sticky='W')
 
     def addCommandBlock(self, parentFrame):
         commandsLabelFrame = tk.LabelFrame(parentFrame, text="Commands", padx=20, pady=20)
@@ -99,18 +102,33 @@ class Server:
     def updateStatus(self, message):
         self.statusLabel.config(text=message)
 
+    def displayError(self, message):
+        self.errorLabel.config(text='ERROR: {}'.format(message))
+
+    def cleanError(self):
+        self.errorLabel.config(text='')
+
     def startGUI(self):
         self._gui.mainloop()
 
     def startServer(self):
+        self.cleanError()
         if self.serverSocket != None:
+            self.displayError('The server is already running')
             return
 
-        self.startButton.config(state=tk.DISABLED)
-        self.stopButton.config(state=tk.NORMAL)
-        print('On veut run le serveur sur le port {}'.format(t.castInt(self.serverPortVar.get())))
+        try:
+            t.isPortValid(self.serverPortVar.get())
+        except Exception as e:
+            self.displayError(str(e))
+        else:
+            self.startButton.config(state=tk.DISABLED)
+            self.stopButton.config(state=tk.NORMAL)
+            print('On veut run le serveur sur le port {}'.format((self.serverPortVar.get())))
+
 
     def stopServer(self):
+        self.cleanError()
         self.stopButton.config(state=tk.DISABLED)
         self.startButton.config(state=tk.NORMAL)
         print('On stoppe le serveur')
