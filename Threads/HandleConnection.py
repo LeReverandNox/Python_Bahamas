@@ -1,5 +1,6 @@
 import threading as t
 import json
+from Threads.Ping import Ping
 
 class HandleConnection(t.Thread):
     def __init__(self, server, lock, socket, ip):
@@ -13,6 +14,9 @@ class HandleConnection(t.Thread):
 
         # Create the base Client, with just his socket and public ip.
         self.server.addClient(socket, ip)
+
+        Ping(socket).start()
+
     def stop(self):
         self.isRunning = False
 
@@ -29,6 +33,7 @@ class HandleConnection(t.Thread):
             return func(data, self.socket)
 
         actionSwitch(action)
+        print(self.server.clients)
 
     def run(self):
         while self.isRunning:
@@ -36,7 +41,9 @@ class HandleConnection(t.Thread):
                 byteMessage = self.socket.recv(1024)
             except Exception as e:
                 print('Lien rompu avec {}'.format(self.ip))
-                print(e)
+                self.stop()
+                self.server.removeClient(self.socket)
+                print(self.server.clients)
             else:
                 if byteMessage:
                     self.parseMessage(byteMessage)
