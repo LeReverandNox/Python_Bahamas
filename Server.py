@@ -166,7 +166,7 @@ class Server:
     # Clients management
     def addClient(self, socket, ip):
         client = {
-            'ip': ip
+            'ip': ip[0]
         }
         self.clients[socket] = client
         return client, self.clients
@@ -178,6 +178,12 @@ class Server:
         client['udpPort'] = data['udpPort']
 
         return client, self.clients
+
+    def removeClient(self, socket):
+        if socket in self.clients:
+            del self.clients[socket]
+            return True
+        return False
 
 server = Server()
 server.startGUI()
