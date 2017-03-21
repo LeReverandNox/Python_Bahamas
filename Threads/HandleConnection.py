@@ -33,7 +33,6 @@ class HandleConnection(t.Thread):
             return func(data, self.socket)
 
         actionSwitch(action)
-        print(self.server.clients)
 
     def run(self):
         while self.isRunning:
@@ -43,7 +42,6 @@ class HandleConnection(t.Thread):
                 print('Lien rompu avec {}'.format(self.ip))
                 self.stop()
                 self.server.removeClient(self.socket)
-                print(self.server.clients)
             else:
                 if byteMessage:
                     self.parseMessage(byteMessage)
