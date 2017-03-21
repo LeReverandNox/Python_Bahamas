@@ -6,6 +6,7 @@ import tkinter.messagebox as msgbox
 import socket as s
 from Tools import Tools as t
 from Threads.HandleSocket import HandleSocket as hS
+from ChannelNameGenerator import ChannelNameGenerator
 
 class Server:
     def __init__(self):
@@ -192,6 +193,13 @@ class Server:
         }
         self.clients[socket] = client
         self.updateLoad()
+
+        channelNameGenerator = ChannelNameGenerator()
+        channelName = channelNameGenerator.generate()
+        while not self.isChannelNameAvailable(channelName):
+            channelName = channelNameGenerator.generate()
+        self.addChannel({'name': channelName}, socket)
+
         return client, self.clients
 
     def completeClient(self, data, socket):
@@ -212,7 +220,7 @@ class Server:
     # Channels management
     def addChannel(self, data, socket):
         name = data['name']
-        if name not in self.channels:
+        if self.isChannelNameAvailable(name):
             client = self.clients[socket]
             channel = {
                 'isFull': False,
@@ -221,10 +229,15 @@ class Server:
                 }
             }
             self.channels[name] = channel
-            print('ON A CREER LE CHANNEL {}'.format(name))
             return channel, self.channels
         else:
             raise Exception('This channel already exist.')
+
+    def isChannelNameAvailable(self, name):
+        if name not in self.channels:
+            return True
+        else:
+            return False
 
 server = Server()
 server.startGUI()
