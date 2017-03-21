@@ -16,10 +16,15 @@ class HandleConnection(t.Thread):
         # Create the base Client, with just his socket and public ip.
         self.server.addClient(socket, ip)
 
-        Ping(socket).start()
+        Ping(socket, self).start()
 
     def stop(self):
         self.isRunning = False
+
+    def die(self):
+        print('Lien rompu avec {}'.format(self.ip))
+        self.stop()
+        self.server.removeClient(self.socket)
 
     def parseMessage(self, byteMessage):
         messageDict = json.loads(byteMessage.decode('utf-8'))
@@ -44,9 +49,7 @@ class HandleConnection(t.Thread):
             try:
                 buffer = self.socket.recv(length)
             except Exception as e:
-                print('Lien rompu avec {}'.format(self.ip))
-                self.stop()
-                self.server.removeClient(self.socket)
+                self.die()
             else:
                 if buffer:
                     completeBuffer += buffer
