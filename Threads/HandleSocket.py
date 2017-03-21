@@ -20,7 +20,6 @@ class HandleSocket(t.Thread):
             except OSError:
                 pass
             else:
-                print('{} est maintenant connecté'.format(clientIp))
-                toto = hC(self.server, self.lock, clientSocket)
+                toto = hC(self.server, self.lock, clientSocket, clientIp)
                 toto.start()
                 # TODO: watch if socket is still alive (ping ?)
