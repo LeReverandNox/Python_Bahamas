@@ -163,6 +163,21 @@ class Server:
     def displayAbout(self):
         msgbox.showinfo('About', 'Powered by laidet_r & cherbi_r\nSDM 2017 All rights reserved')
 
+    # Clients management
+    def addClient(self, socket, ip):
+        client = {
+            'ip': ip
+        }
+        self.clients[socket] = client
+        return client, self.clients
+
+    def completeClient(self, data, socket):
+        client = self.clients[socket]
+        client['username'] = data['username']
+        client['tcpPort'] = data['tcpPort']
+        client['udpPort'] = data['udpPort']
+
+        return client, self.clients
 
 server = Server()
 server.startGUI()
