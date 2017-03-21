@@ -12,6 +12,7 @@ class Server:
         # Attributes
         # GUI
         self.statusLabel = None
+        self.loadLabel = None
         self.errorLabel = None
         self.serverPortVar = None
         self.startButton = None
@@ -45,6 +46,9 @@ class Server:
 
         # Create a frame to hold the server status
         self.addServerStatus(parentFrame)
+
+        # Create a frame to hold the server user load
+        self.addServerLoad(parentFrame)
 
         # Create the command block
         self.addCommandBlock(parentFrame)
@@ -87,6 +91,13 @@ class Server:
         self.errorLabel = tk.Label(statusLabelFrame, text="")
         self.errorLabel.grid(sticky='W')
 
+    def addServerLoad(self, parentFrame):
+        loadLabelFrame = tk.LabelFrame(parentFrame, text="Server load", padx=20, pady=20)
+        loadLabelFrame.grid(sticky='WE')
+
+        self.loadLabel = tk.Label(loadLabelFrame, text="There is no connected user.")
+        self.loadLabel.grid(sticky='W')
+
     def addCommandBlock(self, parentFrame):
         commandsLabelFrame = tk.LabelFrame(parentFrame, text="Commands", padx=20, pady=20)
         commandsLabelFrame.grid(sticky='WE')
@@ -108,6 +119,16 @@ class Server:
 
     def updateStatus(self, message):
         self.statusLabel.config(text=message)
+
+    def updateLoad(self):
+        nbClients = len(self.clients)
+        if nbClients == 1:
+            self.loadLabel.config(text='There is 1 user online')
+        elif nbClients > 1:
+            self.loadLabel.config(text='There is {} users online'.format(nbClients))
+        else:
+            self.loadLabel.config(text='There is no connected user.')
+
 
     def displayError(self, message):
         self.errorLabel.config(text='ERROR: {}'.format(message))
@@ -169,6 +190,7 @@ class Server:
             'ip': ip[0]
         }
         self.clients[socket] = client
+        self.updateLoad()
         return client, self.clients
 
     def completeClient(self, data, socket):
@@ -182,6 +204,7 @@ class Server:
     def removeClient(self, socket):
         if socket in self.clients:
             del self.clients[socket]
+            self.updateLoad()
             return True
         return False
 
