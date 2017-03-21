@@ -23,6 +23,7 @@ class Server:
         self.status = 'offline'
         self.hS = None
         self.addrPort = ()
+        self.MAX_CHANNEL_SIZE = 2
 
         # Clients and Channels
         self.clients = {}
@@ -207,6 +208,23 @@ class Server:
             self.updateLoad()
             return True
         return False
+
+    # Channels management
+    def addChannel(self, data, socket):
+        name = data['name']
+        if name not in self.channels:
+            client = self.clients[socket]
+            channel = {
+                'isFull': False,
+                'clients': {
+                    'toto': client
+                }
+            }
+            self.channels[name] = channel
+            print('ON A CREER LE CHANNEL {}'.format(name))
+            return channel, self.channels
+        else:
+            raise Exception('This channel already exist.')
 
 server = Server()
 server.startGUI()
