@@ -212,8 +212,16 @@ class Server:
 
     def removeClient(self, socket):
         if socket in self.clients:
+            channels = self.getClientChannels(socket)
+            for key in channels:
+                channel = channels[key]
+                self.removeClientFromChannel(socket, channel)
+                if self.isChannelEmpty(channel):
+                    self.deleteChannel({'name': key})
+
             del self.clients[socket]
             self.updateLoad()
+
             return True
         return False
 
@@ -225,7 +233,7 @@ class Server:
             channel = {
                 'isFull': False,
                 'clients': {
-                    'toto': client
+                    socket: client
                 }
             }
             self.channels[name] = channel
@@ -233,11 +241,36 @@ class Server:
         else:
             raise Exception('This channel already exist.')
 
+    def deleteChannel(self, data):
+        name = data['name']
+        if name in self.channels:
+            if not self.channels[name]['clients']:
+                del self.channels[name]
+                return True
+        return False
+
+    def getClientChannels(self, socket):
+        channels = {}
+        for key in self.channels:
+            if socket in self.channels[key]['clients']:
+                channels[key] = self.channels[key]
+        return channels
+
     def isChannelNameAvailable(self, name):
         if name not in self.channels:
             return True
         else:
             return False
+    def isChannelEmpty(self, channel):
+        if not channel['clients']:
+            return True
+        return False
+
+    def removeClientFromChannel(self, socket, channel):
+        if socket in channel['clients']:
+            del channel['clients'][socket]
+            return True
+        return False
 
 server = Server()
 server.startGUI()
