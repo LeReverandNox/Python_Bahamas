@@ -28,13 +28,15 @@ class HandleConnection(t.Thread):
 
     def parseMessage(self, byteMessage):
         messageDict = json.loads(byteMessage.decode('utf-8'))
+        print('Recu {}'.format(messageDict))
         action = messageDict['action']
         data = messageDict['data']
 
         def actionSwitch(action):
             switcher = {
                 'welcome': self.server.completeClient,
-                'createChannel': self.server.addChannel
+                'createChannel': self.server.addChannel,
+                'joinChannel': self.server.joinChannel
             }
             func = switcher.get(action, lambda: "nothing")
             return func(data, self.socket)
@@ -43,6 +45,7 @@ class HandleConnection(t.Thread):
             actionSwitch(action)
         except Exception as e:
             print(str(e))
+
     def recvSome(self, length):
         completeBuffer = b''
         while length:
