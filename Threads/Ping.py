@@ -22,8 +22,8 @@ class Ping(t.Thread):
                     'data': False
                 }).encode('utf-8')
                 pingLength = len(jsonPing)
-                self.socket.send(struct.pack('!I', pingLength))
-                self.socket.send(jsonPing)
+                self.socket.sendall(struct.pack('!I', pingLength))
+                self.socket.sendall(jsonPing)
             except Exception as e:
                 self.stop()
                 self.parentThread.die()
