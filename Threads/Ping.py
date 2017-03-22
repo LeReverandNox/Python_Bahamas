@@ -1,6 +1,8 @@
 import threading as t
 from datetime import datetime
 from time import sleep
+import json
+import struct
 
 class Ping(t.Thread):
     def __init__(self, socket, parentThread):
@@ -15,7 +17,13 @@ class Ping(t.Thread):
     def run(self):
         while self.isRunning:
             try:
-                self.socket.send('ping'.encode())
+                jsonPing = json.dumps({
+                    'action': 'ping',
+                    'data': False
+                }).encode('utf-8')
+                pingLength = len(jsonPing)
+                self.socket.send(struct.pack('!I', pingLength))
+                self.socket.send(jsonPing)
             except Exception as e:
                 self.stop()
                 self.parentThread.die()
