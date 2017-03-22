@@ -7,6 +7,8 @@ import socket as s
 from Tools import Tools as t
 from Threads.HandleSocket import HandleSocket as hS
 from ChannelNameGenerator import ChannelNameGenerator
+import json
+import struct
 
 # DEBUG
 import pprint
@@ -313,6 +315,47 @@ class Server:
                 return True
         print('Le channel {} nexoste pas'.format(channelName))
         return False
+
+    def getChannelList(self, data, socket):
+        channels = {}
+
+        for channelName in self.channels:
+            channel = self.channels[channelName]
+            channelClients = channel['clients']
+
+            clients = []
+            for socket in channelClients:
+                client = channelClients[socket]
+                clients.append({
+                    'username': client['username'],
+                    'ip': client['ip'],
+                    'tcpPort': client['tcpPort'],
+                    'udpPort': client['udpPort'],
+                })
+
+            channels[channelName] = {
+                'name': channelName,
+                'isFull': channel['isFull'],
+                'clients': clients
+            }
+
+        jsonMsg = json.dumps({
+            'action': 'channelList',
+            'error': False,
+            'data': channels
+        })
+
+        self.sendMessage(socket, jsonMsg)
+
+    def sendMessage(self, socket, json):
+        try:
+            data = json.encode('utf-8')
+            dataLength = len(data)
+            socket.sendall(struct.pack('!I', dataLength))
+            socket.sendall(data)
+        except Exception as e:
+            print('Erreur lors de l\'envoie du message : {}'.format(json))
+            print(str(e))
 
 server = Server()
 server.startGUI()
