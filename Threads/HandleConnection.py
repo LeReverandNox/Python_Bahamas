@@ -36,7 +36,8 @@ class HandleConnection(t.Thread):
             switcher = {
                 'welcome': self.server.completeClient,
                 'createChannel': self.server.addChannel,
-                'joinChannel': self.server.joinChannel
+                'joinChannel': self.server.joinChannel,
+                'getChannelList': self.server.getChannelList
             }
             func = switcher.get(action, lambda: "nothing")
             return func(data, self.socket)
