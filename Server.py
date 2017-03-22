@@ -8,6 +8,11 @@ from Tools import Tools as t
 from Threads.HandleSocket import HandleSocket as hS
 from ChannelNameGenerator import ChannelNameGenerator
 
+# DEBUG
+import pprint
+import time
+pp = pprint.PrettyPrinter(indent=4)
+
 class Server:
     def __init__(self):
         # Attributes
@@ -193,6 +198,7 @@ class Server:
         }
         self.clients[socket] = client
         self.updateLoad()
+        print('Un client vient de se connecter depuis l\'ip {}'.format(ip[0]))
 
         channelNameGenerator = ChannelNameGenerator()
         channelName = channelNameGenerator.generate()
@@ -200,6 +206,8 @@ class Server:
             channelName = channelNameGenerator.generate()
         self.addChannel({'name': channelName}, socket)
 
+        print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
+        pp.pprint(self.channels)
         return client, self.clients
 
     def completeClient(self, data, socket):
@@ -208,6 +216,8 @@ class Server:
         client['tcpPort'] = data['tcpPort']
         client['udpPort'] = data['udpPort']
 
+        print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
+        pp.pprint(self.channels)
         return client, self.clients
 
     def removeClient(self, socket):
@@ -217,11 +227,13 @@ class Server:
                 channel = channels[key]
                 self.removeClientFromChannel(socket, channel)
                 if self.isChannelEmpty(channel):
-                    self.deleteChannel({'name': key})
-
+                    self.deleteChannel(key)
+            username = self.clients[socket]['username']
             del self.clients[socket]
             self.updateLoad()
-
+            print('Le client {} a ete supprime suite a sa deconnexion'.format(username))
+            print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
+            pp.pprint(self.channels)
             return True
         return False
 
@@ -231,21 +243,25 @@ class Server:
         if self.isChannelNameAvailable(name):
             client = self.clients[socket]
             channel = {
+                'name': name,
                 'isFull': False,
                 'clients': {
                     socket: client
                 }
             }
             self.channels[name] = channel
+            print('Le channel {} a ete cree'.format(name))
+            print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
+            pp.pprint(self.channels)
             return channel, self.channels
         else:
             raise Exception('This channel already exist.')
 
-    def deleteChannel(self, data):
-        name = data['name']
-        if name in self.channels:
-            if not self.channels[name]['clients']:
-                del self.channels[name]
+    def deleteChannel(self, channelName):
+        if self.doesChannelExist(channelName):
+            if not self.channels[channelName]['clients']:
+                del self.channels[channelName]
+                print('Le channel {} est vide, il a ete supprime'.format(channelName))
                 return True
         return False
 
@@ -266,10 +282,36 @@ class Server:
             return True
         return False
 
+    def doesChannelExist(self, channelName):
+        if channelName in self.channels:
+            return True
+        return False
+
+    def isClientInChannel(self, socket, channel):
+        if socket in channel['clients']:
+            return True
+        return False
+
     def removeClientFromChannel(self, socket, channel):
         if socket in channel['clients']:
             del channel['clients'][socket]
+            print('Le client {} a quitter le channel {}'.format(self.clients[socket]['username'], channel['name']))
             return True
+        return False
+
+    def joinChannel(self, data, socket):
+        channelName = data['name']
+        if self.doesChannelExist(channelName):
+            channel = self.channels[channelName]
+            if not self.isClientInChannel(socket, channel):
+                user = self.clients[socket]
+                channel['clients'][socket] = user
+
+                print('Le client {} a rejoint le channel {}'.format(user['username'], channelName))
+                print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
+                pp.pprint(self.channels)
+                return True
+        print('Le channel {} nexoste pas'.format(channelName))
         return False
 
 server = Server()
