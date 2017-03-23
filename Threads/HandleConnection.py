@@ -24,6 +24,7 @@ class HandleConnection(t.Thread):
     def die(self):
         print('Lien rompu avec {}'.format(self.ip))
         self.stop()
+        self.socket.close()
         self.server.removeClient(self.socket)
 
     def parseMessage(self, byteMessage):
@@ -39,7 +40,7 @@ class HandleConnection(t.Thread):
                 'joinChannel': self.server.joinChannel,
                 'getChannelList': self.server.getChannelList
             }
-            func = switcher.get(action, lambda: "nothing")
+            func = switcher.get(action, lambda foo, bar: "nothing")
             return func(data, self.socket)
 
         try:
