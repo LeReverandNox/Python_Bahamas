@@ -30,7 +30,8 @@ class HandleServerConnection(t.Thread):
 
         def actionSwitch(action):
             switcher = {
-                'channelList': self.client.displayChannelList
+                'channelList': self.client.displayChannelList,
+                'setCurrChannel': self.client.setCurrChannel
             }
             func = switcher.get(action, lambda foo, bar : "nothing")
             return func(data, self.socket)

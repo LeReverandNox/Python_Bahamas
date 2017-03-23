@@ -123,6 +123,9 @@ class Client:
 
         self.hSC.createChannel(channelName)
 
+    def setCurrChannel(self, data, socket):
+        print('On passe de force sur {}'.format(data['name']))
+
     def displayChannelList(self, data, socket):
         self.cleanChannelList()
         for channelName in data:
