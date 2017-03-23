@@ -40,6 +40,7 @@ class Client:
         # Clients and Channels
         self.clients = {}
         self.channels = {}
+        self.currChannel = None
 
         self._gui = self.createGUI()
     def verifyPorts(self):
@@ -103,6 +104,7 @@ class Client:
         self.serverSocket = None
 
         self.cleanChannelList()
+        self.currChannel = None
 
         self.serverConnectButton.config(state=tk.NORMAL)
         self.serverDisconnectButton.config(state=tk.DISABLED)
@@ -124,12 +126,23 @@ class Client:
         self.hSC.createChannel(channelName)
 
     def setCurrChannel(self, data, socket):
-        print('On passe de force sur {}'.format(data['name']))
+        self.currChannel = data['name']
 
     def displayChannelList(self, data, socket):
+        self.channels = data
         self.cleanChannelList()
+
+        i = -1
+        loop = True
         for channelName in data:
             self.channelList.insert(tk.END, channelName)
+            if loop:
+                i += 1
+                if channelName == self.currChannel:
+                    loop = False
+
+        print('currChannel = {}'.format(i))
+        self.channelList.select_set(i)
 
     def cleanChannelList(self):
         self.channelList.delete(0, tk.END)

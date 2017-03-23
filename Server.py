@@ -260,9 +260,9 @@ class Server:
             }
             self.channels[name] = channel
 
+            self.setClientCurrChannel(socket, name)
             if 'username' in client:
                 self.updateChannelListToClients()
-            self.setClientCurrChannel(socket, name)
 
             print('Le channel {} a ete cree'.format(name))
             print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
@@ -321,8 +321,8 @@ class Server:
                 user = self.clients[socket]
                 channel['clients'][socket] = user
 
-                self.updateChannelListToClients()
                 self.setClientCurrChannel(socket, channelName)
+                self.updateChannelListToClients()
 
                 print('Le client {} a rejoint le channel {}'.format(user['username'], channelName))
                 print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
