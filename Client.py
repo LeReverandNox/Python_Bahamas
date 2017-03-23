@@ -19,6 +19,11 @@ class Client:
         self.channelList = None
         self.channelNameVar = None
         self.createChannelButton = None
+        self.chatInfosLabel = None
+        self.usersList = None
+        self.messagesList = None
+        self.messageVar = None
+        self.sendMessageButton = None
 
         # Server
         self.serverSocket = None
@@ -185,9 +190,76 @@ class Client:
         parentFrame.columnconfigure(1, weight=4)
         rightBlockFrame.grid(sticky="NSWE", row=0, column=1)
 
+        self.addChatInfosBlock(rightBlockFrame)
+        self.addChatBlock(rightBlockFrame)
+        self.addChatInputBlock(rightBlockFrame)
+
+    def addChatInfosBlock(self, parentFrame):
+        chatInfosBlockFrame = tk.Frame(parentFrame, bg='orange', padx=10, pady=10)
+        parentFrame.columnconfigure(0, weight=1)
+        chatInfosBlockFrame.grid(sticky='NSWE', row=0, column=0)
+
+        chatInfosLabelFrame = tk.LabelFrame(chatInfosBlockFrame, text="Chat infos")
+        chatInfosBlockFrame.columnconfigure(0, weight=1)
+        chatInfosLabelFrame.grid(sticky='NSEW', row=0, column=0)
+        self.chatInfosLabel = tk.Label(chatInfosLabelFrame, text="")
+        self.chatInfosLabel.grid(sticky='W')
+
+    def addChatBlock(self, parentFrame):
+        chatBlockFrame = tk.Frame(parentFrame, padx=10, pady=5)
+        parentFrame.rowconfigure(1, weight=1)
+        chatBlockFrame.grid(sticky='NSEW', row=1, column=0)
+
+        chatBlockFrame.rowconfigure(0, weight=1)
+        self.addChatUsersBlock(chatBlockFrame)
+        self.addChatMessagesBlock(chatBlockFrame)
+
+    def addChatUsersBlock(self, parentFrame):
+        chatUsersBlockFrame = tk.Frame(parentFrame)
+        parentFrame.columnconfigure(0, weight=1)
+        chatUsersBlockFrame.grid(sticky='NSEW', row=0, column=0)
+
+        # Title of the block
+        usersLabel = tk.Label(chatUsersBlockFrame, text="Users", padx=10, pady=5, bg="green")
+        chatUsersBlockFrame.columnconfigure(0, weight=1)
+        usersLabel.grid(sticky="WE", row=0, column=0)
+
+        # Users list
+        self.usersList = tk.Listbox(chatUsersBlockFrame, selectmode='Single')
+        chatUsersBlockFrame.rowconfigure(1, weight=1)
+        self.usersList.grid(sticky="NSWE", row=1, column=0)
+
+    def addChatMessagesBlock(self, parentFrame):
+        chatMessagesBlockFrame = tk.Frame(parentFrame, bg='limegreen')
+        parentFrame.columnconfigure(1, weight=8)
+        chatMessagesBlockFrame.grid(sticky='NSEW', row=0, column=1)
+
+        # Title of the block
+        messagesLabel = tk.Label(chatMessagesBlockFrame, text="Messages", padx=10, pady=5, bg="brown")
+        chatMessagesBlockFrame.columnconfigure(0, weight=1)
+        messagesLabel.grid(sticky="WE", row=0, column=0)
+
+        # Users list
+        self.usersList = tk.Listbox(chatMessagesBlockFrame, selectmode='Single')
+        chatMessagesBlockFrame.rowconfigure(1, weight=1)
+        self.usersList.grid(sticky="NSWE", row=1, column=0)
+
+    def addChatInputBlock(self, parentFrame):
+        chatInputBlockFrame = tk.Frame(parentFrame, bg='cyan', padx=15, pady=5)
+        chatInputBlockFrame.grid(sticky='NSWE', row=2, column=0)
+
+        self.messageVar = tk.StringVar()
+        messageEntry = tk.Entry(chatInputBlockFrame, textvariable=self.messageVar)
+        self.sendMessageButton = tk.Button(chatInputBlockFrame, text="Send", command=self.sendMessage)
+        chatInputBlockFrame.columnconfigure(0, weight=1)
+        messageEntry.grid(sticky='EW', row=0, column=0)
+        self.sendMessageButton.grid(row=0, column=1)
+
     def joinChannel(self):
         pass
     def createChannel(self):
+        pass
+    def sendMessage(self):
         pass
 
     def startGUI(self):
