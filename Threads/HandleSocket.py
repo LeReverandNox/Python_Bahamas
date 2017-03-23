@@ -20,6 +20,4 @@ class HandleSocket(t.Thread):
             except OSError:
                 pass
             else:
-                toto = hC(self.server, self.lock, clientSocket, clientIp)
-                toto.start()
-                # TODO: watch if socket is still alive (ping ?)
+                hC(self.server, self.lock, clientSocket, clientIp).start()
