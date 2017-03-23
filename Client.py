@@ -15,7 +15,8 @@ class Client:
         self.serverPortVar = None
         self.serverConnectButon = None
         self.serverDisconnectButton = None
-        self.loadLabel = None
+        self.joinChannelButton = None
+        self.channelList = None
 
         # Server
         self.serverSocket = None
@@ -33,7 +34,8 @@ class Client:
     def createGUI(self):
         gui = tk.Tk()
         gui.wm_title('Python_Bahamas Client')
-        gui.grid_columnconfigure(0, weight=1)
+        gui.columnconfigure(0, weight=1)
+        gui.rowconfigure(0, weight=1)
 
         # Set guiMenubar as the window menu
         guiMenubar = self.createMenu(gui)
@@ -41,11 +43,15 @@ class Client:
 
         # Create a parent frame to hold the content
         parentFrame = tk.Frame(gui)
-        parentFrame.grid(padx=25, pady=10, sticky='NSWE')
-        parentFrame.grid_columnconfigure(0, weight=1)
+        parentFrame.grid(padx=25, pady=10, sticky='NSWE', row=0, column=0)
+        parentFrame.columnconfigure(0, weight=1)
+        parentFrame.rowconfigure(1, weight=1)
 
         # Create a frame to hold the server block
         self.addServerBlock(parentFrame)
+
+        # Create a frame to hold the big block
+        self.addBigBlock(parentFrame)
 
         return gui
 
@@ -83,8 +89,8 @@ class Client:
 
 
     def addServerBlock(self, parentFrame):
-        serverLabelFrame = tk.LabelFrame(parentFrame, text="Server", padx=10, pady=5)
-        serverLabelFrame.grid(sticky='WE')
+        serverLabelFrame = tk.LabelFrame(parentFrame, text="Server", padx=10, pady=5, bg="green")
+        serverLabelFrame.grid(sticky='WE', row=0, column=0)
 
         # Label and Entry for the server addr
         serverAddrLabel = tk.Label(serverLabelFrame, text='Address :')
@@ -120,6 +126,54 @@ class Client:
     def disconnectFromServer(self):
         pass
 
+    def addBigBlock(self, parentFrame):
+        bigBlockFrame = tk.Frame(parentFrame, bg="red")
+        bigBlockFrame.grid(sticky='NSWE', row=1, column=0)
+        bigBlockFrame.rowconfigure(0, weight=1)
+
+        self.addLeftBLock(bigBlockFrame)
+        self.addRightBlock(bigBlockFrame)
+
+    def addLeftBLock(self, parentFrame):
+        leftBlockFrame = tk.Frame(parentFrame, bg="blue")
+        parentFrame.columnconfigure(0, weight=1)
+        leftBlockFrame.grid(sticky="NSWE", row=0, column=0, padx=10, pady=10)
+        leftBlockFrame.columnconfigure(0, weight=1)
+
+        self.addChannelsBlock(leftBlockFrame)
+        self.addAddChannelsBlock(leftBlockFrame)
+
+    def addChannelsBlock(self, parentFrame):
+        channelsFrame = tk.Frame(parentFrame, bg="pink")
+        parentFrame.rowconfigure(0, weight=4)
+        channelsFrame.grid(sticky="NSWE", row=0, column=0)
+
+        # Title of the block
+        channelsLabel = tk.Label(channelsFrame, text="Channels", padx=10, pady=5, bg="green")
+        channelsFrame.columnconfigure(0, weight=1)
+        channelsLabel.grid(sticky="WE", row=0, column=0)
+
+        # Channel list
+        self.channelList = tk.Listbox(channelsFrame, selectmode='Single')
+        channelsFrame.rowconfigure(1, weight=1)
+        self.channelList.grid(sticky="NSWE", row=1, column=0)
+
+        # Join button
+        self.joinChannelButton = tk.Button(channelsFrame, text="Join", command=self.joinChannel)
+        self.joinChannelButton.grid(row=2, column=0)
+
+    def addAddChannelsBlock(self, parentFrame):
+        addChannelsFrame = tk.Frame(parentFrame, bg="magenta")
+        parentFrame.rowconfigure(1, weight=1)
+        addChannelsFrame.grid(sticky='NSWE', row=1, column=0)
+
+    def addRightBlock(self, parentFrame):
+        rightBlockFrame = tk.Frame(parentFrame, bg="yellow")
+        parentFrame.columnconfigure(1, weight=4)
+        rightBlockFrame.grid(sticky="NSWE", row=0, column=1)
+
+    def joinChannel(self):
+        pass
     def startGUI(self):
         self._gui.mainloop()
 
