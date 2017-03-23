@@ -80,6 +80,15 @@ class HandleServerConnection(t.Thread):
         })
         self.sendMessage(jsonMsg)
 
+    def createChannel(self, name):
+        jsonMsg = json.dumps({
+            'action': 'createChannel',
+            'data': {
+                'name': name
+            }
+        })
+        self.sendMessage(jsonMsg)
+
     def sendMessage(self, json):
         data = json.encode('utf-8')
         dataLength = len(data)

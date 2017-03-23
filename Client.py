@@ -98,6 +98,7 @@ class Client:
 
     def disconnectFromServer(self):
         self.hSC.die()
+        self.hSC = None
         self.serverSocket.close()
         self.serverSocket = None
 
@@ -106,8 +107,20 @@ class Client:
 
     def joinChannel(self):
         pass
+
     def createChannel(self):
-        pass
+        self.cleanInfo()
+
+        channelName = self.channelNameVar.get().strip()
+        if (len(channelName)) < 1:
+            self.displayInfo('Please enter a name to create a channel')
+            return False
+        if not self.hSC:
+            self.displayInfo('You must be connected to create a channel')
+            return False
+
+        self.hSC.createChannel(channelName)
+
     def sendMessage(self):
         pass
 
@@ -368,6 +381,13 @@ class Client:
 
     def cleanError(self):
         self.serverErrorLabel.config(text='')
+
+    def displayInfo(self, message):
+        self.chatInfosLabel.config(text=message)
+
+    def cleanInfo(self):
+        self.chatInfosLabel.config(text='')
+
 
     def startGUI(self):
         self._gui.mainloop()
