@@ -5,7 +5,8 @@ import tkinter as tk
 import tkinter.messagebox as msgbox
 import socket as s
 from misc.Tools import Tools as t
-
+from Threads.HandleClientTCPSocket import HandleClientTCPSocket as hCTCPS
+from Threads.HandleServerConnection import HandleServerConnection as hSC
 class Client:
     def __init__(self):
         # Attributes
@@ -32,6 +33,7 @@ class Client:
         # Server
         self.serverSocket = None
         self.tcpSocket = None
+        self.hCTCPS = None
         self.udpSocket = None
         self.hS = None
 
@@ -59,6 +61,16 @@ class Client:
             return False
         return username
 
+    def startClientSockets(self, ports):
+        tcpAddrPort = ('0.0.0.0', ports[0])
+        self.tcpSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
+        self.tcpSocket.bind(tcpAddrPort)
+        self.tcpSocket.listen(5)
+        self.hCTCPS = hCTCPS(self, self.tcpSocket)
+        self.hCTCPS.start()
+
+        return True
+
     def connectToServer(self):
         self.cleanError()
         if self.serverSocket != None:
@@ -72,24 +84,15 @@ class Client:
                 serverAddrPort = ((self.serverAddrVar.get() or 'null'), int(self.serverPortVar.get() or 0))
                 self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
                 self.serverSocket.connect(serverAddrPort)
+                hSC(self, self.serverSocket).start()
             except Exception as e:
                 print(e)
                 self.displayError('Can\'t establish a connection to the server : {}'.format(str(e)))
             else:
-                print('WALLAH ON EST CO AU SERV')
                 self.serverConnectButton.config(state=tk.DISABLED)
                 self.serverDisconnectButton.config(state=tk.NORMAL)
 
-            # self.addrPort = ('0.0.0.0', port)
-            # self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
-            # self.serverSocket.bind(self.addrPort)
-            # self.serverSocket.listen(5)
-
-            # self.hS = hS(self, self.serverSocket)
-            # self.hS.start()
-
-            # self.status = 'online'
-            # self.updateStatus('The Python_Bahamas Server is currently {} ({}:{})'.format(self.status, *self.addrPort))
+                self.startClientSockets(ports)
 
     def disconnectFromServer(self):
         pass
