@@ -35,7 +35,7 @@ class Client:
         self.tcpSocket = None
         self.hCTCPS = None
         self.udpSocket = None
-        self.hS = None
+        self.hSC = None
 
         # Clients and Channels
         self.clients = {}
@@ -84,10 +84,12 @@ class Client:
                 serverAddrPort = ((self.serverAddrVar.get() or 'null'), int(self.serverPortVar.get() or 0))
                 self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
                 self.serverSocket.connect(serverAddrPort)
-                hSC(self, self.serverSocket).start()
+                self.hSC = hSC(self, self.serverSocket)
+                self.hSC.start()
             except Exception as e:
                 print(e)
                 self.displayError('Can\'t establish a connection to the server : {}'.format(str(e)))
+                self.serverSocket = None
             else:
                 self.serverConnectButton.config(state=tk.DISABLED)
                 self.serverDisconnectButton.config(state=tk.NORMAL)
@@ -95,7 +97,13 @@ class Client:
                 self.startClientSockets(ports)
 
     def disconnectFromServer(self):
-        pass
+        self.hSC.die()
+        self.serverSocket.close()
+        self.serverSocket = None
+
+        self.serverConnectButton.config(state=tk.NORMAL)
+        self.serverDisconnectButton.config(state=tk.DISABLED)
+
     def joinChannel(self):
         pass
     def createChannel(self):
