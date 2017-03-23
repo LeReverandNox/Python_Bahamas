@@ -12,7 +12,6 @@ class HandleServerConnection(t.Thread):
         self.isRunning = True
 
         self.sayHello()
-        self.getChannelList()
 
         Ping(socket, self).start()
 
