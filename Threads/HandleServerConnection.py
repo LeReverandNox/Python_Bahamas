@@ -46,7 +46,7 @@ class HandleServerConnection(t.Thread):
             try:
                 buffer = self.socket.recv(length)
             except Exception as e:
-                self.die()
+                pass
             else:
                 if buffer:
                     completeBuffer += buffer
