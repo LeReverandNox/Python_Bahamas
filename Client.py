@@ -14,7 +14,7 @@ class Client:
         self.serverErrorLabel = None
         self.serverAddrVar = None
         self.serverPortVar = None
-        self.serverConnectButon = None
+        self.serverConnectButton = None
         self.serverDisconnectButton = None
         self.joinChannelButton = None
         self.channelList = None
@@ -27,9 +27,12 @@ class Client:
         self.sendMessageButton = None
         self.tcpPortVar = None
         self.udpPortVar = None
+        self.usernameVar = None
 
         # Server
         self.serverSocket = None
+        self.tcpSocket = None
+        self.udpSocket = None
         self.hS = None
 
         # Clients and Channels
@@ -37,9 +40,57 @@ class Client:
         self.channels = {}
 
         self._gui = self.createGUI()
+    def verifyPorts(self):
+        try:
+            tcpPort = t.isPortValid(self.tcpPortVar.get(), 'tcp')
+            udpPort = t.isPortValid(self.udpPortVar.get(), 'udp')
+            if tcpPort == udpPort:
+                raise Exception('UDP and TCP port can\'t be identical.')
+        except Exception as e:
+            self.displayError(str(e))
+            return False
+        else:
+            return (tcpPort, udpPort)
+
+    def verifyUsername(self):
+        username = self.usernameVar.get()
+        if len(username) < 1:
+            self.displayError('Please choose a username !')
+            return False
+        return username
 
     def connectToServer(self):
-        pass
+        self.cleanError()
+        if self.serverSocket != None:
+            self.displayError('You are already connected to the server')
+            return
+
+        ports = self.verifyPorts()
+        username = self.verifyUsername()
+        if ports and username:
+            try:
+                serverAddrPort = ((self.serverAddrVar.get() or 'null'), int(self.serverPortVar.get() or 0))
+                self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
+                self.serverSocket.connect(serverAddrPort)
+            except Exception as e:
+                print(e)
+                self.displayError('Can\'t establish a connection to the server : {}'.format(str(e)))
+            else:
+                print('WALLAH ON EST CO AU SERV')
+                self.serverConnectButton.config(state=tk.DISABLED)
+                self.serverDisconnectButton.config(state=tk.NORMAL)
+
+            # self.addrPort = ('0.0.0.0', port)
+            # self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
+            # self.serverSocket.bind(self.addrPort)
+            # self.serverSocket.listen(5)
+
+            # self.hS = hS(self, self.serverSocket)
+            # self.hS.start()
+
+            # self.status = 'online'
+            # self.updateStatus('The Python_Bahamas Server is currently {} ({}:{})'.format(self.status, *self.addrPort))
+
     def disconnectFromServer(self):
         pass
     def joinChannel(self):
@@ -131,16 +182,16 @@ class Client:
 
 
         # Buttons to command the server
-        self.serverConnectButon = tk.Button(serverLabelFrame, text='Connect', command=self.connectToServer)
+        self.serverConnectButton = tk.Button(serverLabelFrame, text='Connect', command=self.connectToServer)
         self.serverDisconnectButton = tk.Button(serverLabelFrame, text='Disconnect', state=tk.DISABLED, command=self.disconnectFromServer)
-        self.serverConnectButon.grid(row=0, column=4)
+        self.serverConnectButton.grid(row=0, column=4)
         self.serverDisconnectButton.grid(row=0, column=5)
 
         self.serverStatusLabel = tk.Label(serverLabelFrame, text="")
-        self.serverStatusLabel.grid(sticky='W', row=1)
+        self.serverStatusLabel.grid(sticky='W', row=1, columnspan=10)
 
         self.serverErrorLabel = tk.Label(serverLabelFrame, text="")
-        self.serverErrorLabel.grid(sticky='W', row=2)
+        self.serverErrorLabel.grid(sticky='W', row=2, columnspan=10)
 
     def addHeadBlock(self, parentFrame):
         headBlockFrame = tk.Frame(parentFrame, bg="green")
@@ -170,6 +221,13 @@ class Client:
         udpPortLabel.grid(row=1, column=0)
         udpPortEntry.grid(row=1, column=1)
 
+        # Label and Entry for the username
+        usernameLabel = tk.Label(settingsLabelFrame, text='Username :')
+        self.usernameVar = tk.StringVar()
+        self.usernameVar.set('Bobby')
+        usernameEntry = tk.Entry(settingsLabelFrame, textvariable=self.usernameVar)
+        usernameLabel.grid(row=2, column=0)
+        usernameEntry.grid(row=2, column=1)
 
 
     def addBigBlock(self, parentFrame):
@@ -293,6 +351,12 @@ class Client:
         chatInputBlockFrame.columnconfigure(0, weight=1)
         messageEntry.grid(sticky='EW', row=0, column=0)
         self.sendMessageButton.grid(row=0, column=1)
+
+    def displayError(self, message):
+        self.serverErrorLabel.config(text='ERROR: {}'.format(message))
+
+    def cleanError(self):
+        self.serverErrorLabel.config(text='')
 
     def startGUI(self):
         self._gui.mainloop()
