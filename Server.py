@@ -155,7 +155,7 @@ class Server:
             return
 
         try:
-            port = t.isPortValid(self.serverPortVar.get())
+            port = t.isPortValid(self.serverPortVar.get(), 'server')
         except Exception as e:
             self.displayError(str(e))
         else:
