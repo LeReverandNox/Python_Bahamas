@@ -17,6 +17,8 @@ class Client:
         self.serverDisconnectButton = None
         self.joinChannelButton = None
         self.channelList = None
+        self.channelNameVar = None
+        self.createChannelButton = None
 
         # Server
         self.serverSocket = None
@@ -164,8 +166,19 @@ class Client:
 
     def addAddChannelsBlock(self, parentFrame):
         addChannelsFrame = tk.Frame(parentFrame, bg="magenta")
-        parentFrame.rowconfigure(1, weight=1)
+        parentFrame.rowconfigure(1, weight=0)
         addChannelsFrame.grid(sticky='NSWE', row=1, column=0)
+
+        addChannelsLabelFrame = tk.LabelFrame(addChannelsFrame, text="Create a channel")
+        addChannelsFrame.columnconfigure(0, weight=1)
+        addChannelsFrame.rowconfigure(0, weight=1)
+        addChannelsLabelFrame.grid(row=0, column=0)
+
+        self.channelNameVar = tk.StringVar()
+        channelNameEntry = tk.Entry(addChannelsLabelFrame, textvariable=self.channelNameVar)
+        self.createChannelButton = tk.Button(addChannelsLabelFrame, text="Create", command=self.createChannel)
+        channelNameEntry.grid(row=0, column=0)
+        self.createChannelButton.grid(row=0, column=1)
 
     def addRightBlock(self, parentFrame):
         rightBlockFrame = tk.Frame(parentFrame, bg="yellow")
@@ -174,6 +187,9 @@ class Client:
 
     def joinChannel(self):
         pass
+    def createChannel(self):
+        pass
+
     def startGUI(self):
         self._gui.mainloop()
 
