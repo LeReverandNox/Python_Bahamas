@@ -150,7 +150,7 @@ class Client:
         # Label and Entry for the server addr
         tcpPortLabel = tk.Label(settingsLabelFrame, text='TCP port :')
         self.tcpPortVar = tk.StringVar()
-        self.tcpPortVar.set('127.0.0.1')
+        self.tcpPortVar.set('5000')
         tcpPortEntry = tk.Entry(settingsLabelFrame, textvariable=self.tcpPortVar)
         tcpPortLabel.grid(row=0, column=0)
         tcpPortEntry.grid(row=0, column=1)
@@ -158,7 +158,7 @@ class Client:
         # Label and Entry for the server port
         udpPortLabel = tk.Label(settingsLabelFrame, text='UDP port :')
         self.udpPortVar = tk.StringVar()
-        self.udpPortVar.set(4200)
+        self.udpPortVar.set('5001')
         udpPortEntry = tk.Entry(settingsLabelFrame, textvariable=self.udpPortVar)
         udpPortLabel.grid(row=1, column=0)
         udpPortEntry.grid(row=1, column=1)
