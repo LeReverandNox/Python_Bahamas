@@ -4,6 +4,7 @@
 import tkinter as tk
 import tkinter.messagebox as msgbox
 import socket as s
+from misc.Tools import Tools as t
 
 class Client:
     def __init__(self):
@@ -29,10 +30,7 @@ class Client:
 
         # Server
         self.serverSocket = None
-        self.status = 'offline'
         self.hS = None
-        self.addrPort = ()
-        self.MAX_CHANNEL_SIZE = 2
 
         # Clients and Channels
         self.clients = {}
@@ -40,6 +38,20 @@ class Client:
 
         self._gui = self.createGUI()
 
+    def connectToServer(self):
+        pass
+    def disconnectFromServer(self):
+        pass
+    def joinChannel(self):
+        pass
+    def createChannel(self):
+        pass
+    def sendMessage(self):
+        pass
+
+
+
+    # GUI
     def createGUI(self):
         gui = tk.Tk()
         gui.wm_title('Python_Bahamas Client')
@@ -96,7 +108,6 @@ class Client:
     def displayAbout(self):
         msgbox.showinfo('About', 'Powered by laidet_r & cherbi_r\nSDM 2017 All rights reserved')
 
-
     def addServerBlock(self, parentFrame):
         serverLabelFrame = tk.LabelFrame(parentFrame, text="Server", padx=10, pady=5, bg="green")
         parentFrame.columnconfigure(1, weight=1)
@@ -131,10 +142,6 @@ class Client:
         self.serverErrorLabel = tk.Label(serverLabelFrame, text="")
         self.serverErrorLabel.grid(sticky='W', row=2)
 
-    def connectToServer(self):
-        pass
-    def disconnectFromServer(self):
-        pass
     def addHeadBlock(self, parentFrame):
         headBlockFrame = tk.Frame(parentFrame, bg="green")
         headBlockFrame.grid(sticky='WE', row=0, column=0)
@@ -286,13 +293,6 @@ class Client:
         chatInputBlockFrame.columnconfigure(0, weight=1)
         messageEntry.grid(sticky='EW', row=0, column=0)
         self.sendMessageButton.grid(row=0, column=1)
-
-    def joinChannel(self):
-        pass
-    def createChannel(self):
-        pass
-    def sendMessage(self):
-        pass
 
     def startGUI(self):
         self._gui.mainloop()
