@@ -24,6 +24,8 @@ class Client:
         self.messagesList = None
         self.messageVar = None
         self.sendMessageButton = None
+        self.tcpPortVar = None
+        self.udpPortVar = None
 
         # Server
         self.serverSocket = None
@@ -55,7 +57,7 @@ class Client:
         parentFrame.rowconfigure(1, weight=1)
 
         # Create a frame to hold the server block
-        self.addServerBlock(parentFrame)
+        self.addHeadBlock(parentFrame)
 
         # Create a frame to hold the big block
         self.addBigBlock(parentFrame)
@@ -97,7 +99,8 @@ class Client:
 
     def addServerBlock(self, parentFrame):
         serverLabelFrame = tk.LabelFrame(parentFrame, text="Server", padx=10, pady=5, bg="green")
-        serverLabelFrame.grid(sticky='WE', row=0, column=0)
+        parentFrame.columnconfigure(1, weight=1)
+        serverLabelFrame.grid(sticky='NSWE', row=0, column=1)
 
         # Label and Entry for the server addr
         serverAddrLabel = tk.Label(serverLabelFrame, text='Address :')
@@ -123,15 +126,44 @@ class Client:
         self.serverDisconnectButton.grid(row=0, column=5)
 
         self.serverStatusLabel = tk.Label(serverLabelFrame, text="")
-        self.serverStatusLabel.grid(sticky='W')
+        self.serverStatusLabel.grid(sticky='W', row=1)
 
         self.serverErrorLabel = tk.Label(serverLabelFrame, text="")
-        self.serverErrorLabel.grid(sticky='W')
+        self.serverErrorLabel.grid(sticky='W', row=2)
 
     def connectToServer(self):
         pass
     def disconnectFromServer(self):
         pass
+    def addHeadBlock(self, parentFrame):
+        headBlockFrame = tk.Frame(parentFrame, bg="green")
+        headBlockFrame.grid(sticky='WE', row=0, column=0)
+
+        self.addSettingsBlock(headBlockFrame)
+        self.addServerBlock(headBlockFrame)
+
+    def addSettingsBlock(self, parentFrame):
+        settingsLabelFrame = tk.LabelFrame(parentFrame, text="Settings", padx=10, pady=5, bg="green")
+        parentFrame.columnconfigure(0, weight=1)
+        settingsLabelFrame.grid(sticky='NSWE', row=0, column=0)
+
+        # Label and Entry for the server addr
+        tcpPortLabel = tk.Label(settingsLabelFrame, text='TCP port :')
+        self.tcpPortVar = tk.StringVar()
+        self.tcpPortVar.set('127.0.0.1')
+        tcpPortEntry = tk.Entry(settingsLabelFrame, textvariable=self.tcpPortVar)
+        tcpPortLabel.grid(row=0, column=0)
+        tcpPortEntry.grid(row=0, column=1)
+
+        # Label and Entry for the server port
+        udpPortLabel = tk.Label(settingsLabelFrame, text='UDP port :')
+        self.udpPortVar = tk.StringVar()
+        self.udpPortVar.set(4200)
+        udpPortEntry = tk.Entry(settingsLabelFrame, textvariable=self.udpPortVar)
+        udpPortLabel.grid(row=1, column=0)
+        udpPortEntry.grid(row=1, column=1)
+
+
 
     def addBigBlock(self, parentFrame):
         bigBlockFrame = tk.Frame(parentFrame, bg="red")
