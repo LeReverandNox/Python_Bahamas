@@ -18,9 +18,9 @@ class Tools(metaclass=Singleton):
     def isPortValid(nbr, portType):
         port = Tools.castInt(nbr)
         if port == 0:
-            raise TypeError('Please enter a numeric port value')
+            raise TypeError('Please enter a numeric {} port value'.format(portType))
         if port < 1024 or port > 65535:
-            raise ValueError('The port must be in the range 1024-65535')
+            raise ValueError('The {} port must be in the range 1024-65535'.format(portType))
         if not Tools.isPortAvailable(port, portType):
             pass
 
