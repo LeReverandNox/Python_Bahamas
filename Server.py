@@ -4,9 +4,9 @@
 import tkinter as tk
 import tkinter.messagebox as msgbox
 import socket as s
-from Tools import Tools as t
 from Threads.HandleSocket import HandleSocket as hS
-from ChannelNameGenerator import ChannelNameGenerator
+from misc.Tools import Tools as t
+from misc.ChannelNameGenerator import ChannelNameGenerator
 import json
 import struct
 
@@ -180,6 +180,9 @@ class Server:
         self.serverSocket.shutdown(s.SHUT_RDWR)
         self.serverSocket.close()
         self.serverSocket = None
+
+        self.clients = {}
+        self.updateLoad()
 
         self.stopButton.config(state=tk.DISABLED)
         self.startButton.config(state=tk.NORMAL)
