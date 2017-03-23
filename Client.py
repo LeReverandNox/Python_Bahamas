@@ -102,6 +102,8 @@ class Client:
         self.serverSocket.close()
         self.serverSocket = None
 
+        self.cleanChannelList()
+
         self.serverConnectButton.config(state=tk.NORMAL)
         self.serverDisconnectButton.config(state=tk.DISABLED)
 
@@ -120,6 +122,15 @@ class Client:
             return False
 
         self.hSC.createChannel(channelName)
+
+    def displayChannelList(self, data, socket):
+        self.cleanChannelList()
+        for channelName in data:
+            self.channelList.insert(tk.END, channelName)
+
+    def cleanChannelList(self):
+        self.channelList.delete(0, tk.END)
+
 
     def sendMessage(self):
         pass
