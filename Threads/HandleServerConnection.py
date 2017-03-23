@@ -12,6 +12,8 @@ class HandleServerConnection(t.Thread):
         self.isRunning = True
 
         self.sayHello()
+        self.getChannelList()
+
         Ping(socket, self).start()
 
     def stop(self):
@@ -67,6 +69,14 @@ class HandleServerConnection(t.Thread):
                 'tcpPort': int(self.client.tcpPortVar.get()),
                 'udpPort': int(self.client.udpPortVar.get())
             }
+        })
+        self.sendMessage(jsonMsg)
+
+
+    def getChannelList(self):
+        jsonMsg = json.dumps({
+            'action': 'getChannelList',
+            'data': False
         })
         self.sendMessage(jsonMsg)
 
