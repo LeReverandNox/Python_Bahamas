@@ -4,16 +4,12 @@ from Threads.Ping import Ping
 import struct
 
 class HandleFromClientConnection(t.Thread):
-    def __init__(self, server, socket):
+    def __init__(self, client, socket):
         t.Thread.__init__(self)
 
-        self.server = server
+        self.client = client
         self.socket = socket
         self.isRunning = True
-
-        print('On a recu une connexion !')
-        # Create the base Client, with just his socket and public ip.
-        # self.server.addClient(socket, ip)
 
         # Ping(socket, self).start()
 
@@ -33,10 +29,7 @@ class HandleFromClientConnection(t.Thread):
 
         def actionSwitch(action):
             switcher = {
-                'welcome': self.server.completeClient,
-                'createChannel': self.server.addChannel,
-                'joinChannel': self.server.joinChannel,
-                'getChannelList': self.server.getChannelList
+                'incomingMessage': self.client.receiveMessage
             }
             func = switcher.get(action, lambda: "nothing")
             return func(data, self.socket)

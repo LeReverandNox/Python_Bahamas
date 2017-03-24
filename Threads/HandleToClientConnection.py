@@ -103,3 +103,6 @@ class HandleToClientConnection(t.Thread):
         dataLength = len(data)
         self.socket.sendall(struct.pack('!I', dataLength))
         self.socket.sendall(data)
+
+    def sendTextMessage(self, data):
+        self.sendMessage(data)

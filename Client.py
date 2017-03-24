@@ -234,7 +234,8 @@ class Client:
             'data': {
                 'username': self.username,
                 'channel': self.currChannel,
-                'message': message
+                'message': message,
+                'tcpPort': self.ports[0]
             }
         })
 
@@ -246,10 +247,13 @@ class Client:
 
         if self.currChannel in self.channelsSockets:
             for client in self.channelsSockets[self.currChannel]:
-                print('On va envoyer : {} a {}'.format(message, client))
+                client['connection'].sendTextMessage(jsonMsg)
 
     def receiveMessage(self, data, socket):
-        pass
+        if not self.currChannel in self.channelsMessages:
+            self.channelsMessages[data['channel']] = []
+        self.channelsMessages[data['channel']].append('<{} {}:{}> : {}'.format(data['username'], socket.getpeername()[0], data['tcpPort'], data['message']))
+        self.displayMessages()
 
     def displayMessages(self):
         self.messagesList.insert(tk.END, self.channelsMessages[self.currChannel][-1])
