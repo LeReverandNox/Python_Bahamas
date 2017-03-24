@@ -263,6 +263,7 @@ class Server:
             self.setClientCurrChannel(socket, name)
             if 'username' in client:
                 self.updateChannelListToClients()
+            self.startPeers(socket)
 
             print('Le channel {} a ete cree'.format(name))
             print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
@@ -323,6 +324,7 @@ class Server:
 
                 self.setClientCurrChannel(socket, channelName)
                 self.updateChannelListToClients()
+                self.startPeers(socket)
 
                 print('Le client {} a rejoint le channel {}'.format(user['username'], channelName))
                 print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
@@ -330,6 +332,7 @@ class Server:
                 return True
             self.setClientCurrChannel(socket, channelName)
             self.updateChannelListToClients()
+            self.startPeers(socket)
             return False
         print('Le channel {} nexoste pas'.format(channelName))
         return False
@@ -341,6 +344,14 @@ class Server:
             'data': {
                 'name': channel
             }
+        })
+        self.sendMessage(socket, jsonMsg)
+
+    def startPeers(self, socket):
+        jsonMsg = json.dumps({
+            'action': 'startPeers',
+            'error': False,
+            'data': False
         })
         self.sendMessage(socket, jsonMsg)
 
