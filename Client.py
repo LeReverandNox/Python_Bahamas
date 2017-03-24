@@ -121,8 +121,6 @@ class Client:
                 i += 1
                 if i == channelIndex:
                     break
-        self.currChannel = channelName
-        print(self.currChannel)
         self.hSC.joinChannel(channelName)
 
     def createChannel(self):
@@ -156,10 +154,20 @@ class Client:
 
         print('currChannel = {}'.format(i))
         self.channelList.select_set(i)
+        self.displayUsersList()
 
     def cleanChannelList(self):
         self.channelList.delete(0, tk.END)
 
+
+    def displayUsersList(self):
+        self.cleanUsersList()
+        clients = self.channels[self.currChannel]['clients']
+        for client in clients:
+            self.usersList.insert(tk.END, '{} ({}:{})'.format(client['username'], client['ip'], client['tcpPort']))
+
+    def cleanUsersList(self):
+        self.usersList.delete(0, tk.END)
 
     def sendMessage(self):
         pass
@@ -401,9 +409,9 @@ class Client:
         messagesLabel.grid(sticky="WE", row=0, column=0)
 
         # Users list
-        self.usersList = tk.Listbox(chatMessagesBlockFrame, selectmode='Single')
+        self.messagesList = tk.Listbox(chatMessagesBlockFrame, selectmode='Single')
         chatMessagesBlockFrame.rowconfigure(1, weight=1)
-        self.usersList.grid(sticky="NSWE", row=1, column=0)
+        self.messagesList.grid(sticky="NSWE", row=1, column=0)
 
     def addChatInputBlock(self, parentFrame):
         chatInputBlockFrame = tk.Frame(parentFrame, bg='cyan', padx=15, pady=5)

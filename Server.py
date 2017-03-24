@@ -328,6 +328,8 @@ class Server:
                 print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
                 pp.pprint(self.channels)
                 return True
+            self.setClientCurrChannel(socket, channelName)
+            self.updateChannelListToClients()
             return False
         print('Le channel {} nexoste pas'.format(channelName))
         return False
