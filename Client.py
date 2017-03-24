@@ -5,6 +5,7 @@ import tkinter as tk
 import tkinter.messagebox as msgbox
 import socket as s
 from misc.Tools import Tools as t
+import json
 from Threads.HandleClientTCPSocket import HandleClientTCPSocket as hCTCPS
 from Threads.HandleServerConnection import HandleServerConnection as hSC
 from Threads.HandleToClientConnection import HandleToClientConnection as hTCC
@@ -44,6 +45,7 @@ class Client:
         # Clients and Channels
         self.channels = {}
         self.channelsSockets = {}
+        self.channelsMessages = {}
         self.currChannel = None
         self.hasChannelChange = False
 
@@ -147,6 +149,7 @@ class Client:
         if not self.currChannel == channelName:
             self.currChannel = data['name']
             self.hasChannelChange = True
+            self.cleanMessages()
         else:
             self.currChannel = data['name']
             self.hasChannelChange = True
@@ -222,9 +225,37 @@ class Client:
         self.usersList.delete(0, tk.END)
 
     def sendMessage(self):
+        message = self.messageVar.get().strip()
+        if len(message) < 1:
+            return False
+
+        jsonMsg = json.dumps({
+            'action': 'incomingMessage',
+            'data': {
+                'username': self.username,
+                'channel': self.currChannel,
+                'message': message
+            }
+        })
+
+        if not self.currChannel in self.channelsMessages:
+            self.channelsMessages[self.currChannel] = []
+
+        self.channelsMessages[self.currChannel].append('<{}> : {}'.format(self.username, message))
+        self.displayMessages()
+
+        if self.currChannel in self.channelsSockets:
+            for client in self.channelsSockets[self.currChannel]:
+                print('On va envoyer : {} a {}'.format(message, client))
+
+    def receiveMessage(self, data, socket):
         pass
 
+    def displayMessages(self):
+        self.messagesList.insert(tk.END, self.channelsMessages[self.currChannel][-1])
 
+    def cleanMessages(self):
+        self.messagesList.delete(0, tk.END)
 
     # GUI
     def createGUI(self):
