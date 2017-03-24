@@ -31,7 +31,8 @@ class HandleServerConnection(t.Thread):
         def actionSwitch(action):
             switcher = {
                 'channelList': self.client.displayChannelList,
-                'setCurrChannel': self.client.setCurrChannel
+                'setCurrChannel': self.client.setCurrChannel,
+                'startPeers': self.client.startPeers
             }
             func = switcher.get(action, lambda foo, bar : "nothing")
             return func(data, self.socket)
@@ -66,9 +67,9 @@ class HandleServerConnection(t.Thread):
         jsonMsg = json.dumps({
             'action': 'welcome',
             'data': {
-                'username': self.client.usernameVar.get(),
-                'tcpPort': int(self.client.tcpPortVar.get()),
-                'udpPort': int(self.client.udpPortVar.get())
+                'username': self.client.username,
+                'tcpPort': int(self.client.ports[0]),
+                'udpPort': int(self.client.ports[1])
             }
         })
         self.sendMessage(jsonMsg)
