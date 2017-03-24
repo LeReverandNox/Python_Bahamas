@@ -152,10 +152,10 @@ class Client:
             self.hasChannelChange = True
 
     def startPeers(self, data, socket):
-        if self.hasChannelChange:
-            self.hasChannelChange = False
-            self.stopCurrPeers()
-            self.startNewPeers()
+        # if self.hasChannelChange:
+        self.hasChannelChange = False
+        self.stopCurrPeers()
+        self.startNewPeers()
 
     def stopCurrPeers(self):
         print('On stop les anciens peers')
@@ -165,7 +165,6 @@ class Client:
         clients = self.channels[self.currChannel]['clients']
         for client in clients:
             if not self.isItMe(client):
-                print('On va se connecter a {} {}:{}'.format(client['username'], client['ip'], client['tcpPort']))
                 toClient = client.copy()
                 try:
                     toClientAddPort = (client['ip'], int(client['tcpPort']))
