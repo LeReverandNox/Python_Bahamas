@@ -250,10 +250,11 @@ class Client:
                 client['connection'].sendTextMessage(jsonMsg)
 
     def receiveMessage(self, data, socket):
-        if not self.currChannel in self.channelsMessages:
-            self.channelsMessages[data['channel']] = []
-        self.channelsMessages[data['channel']].append('<{} {}:{}> : {}'.format(data['username'], socket.getpeername()[0], data['tcpPort'], data['message']))
-        self.displayMessages()
+        if self.currChannel == data['channel']:
+            if not self.currChannel in self.channelsMessages:
+                self.channelsMessages[data['channel']] = []
+            self.channelsMessages[data['channel']].append('<{} {}:{}> : {}'.format(data['username'], socket.getpeername()[0], data['tcpPort'], data['message']))
+            self.displayMessages()
 
     def displayMessages(self):
         self.messagesList.insert(tk.END, self.channelsMessages[self.currChannel][-1])
