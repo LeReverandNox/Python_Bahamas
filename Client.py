@@ -5,8 +5,11 @@ import tkinter as tk
 import tkinter.messagebox as msgbox
 import socket as s
 from misc.Tools import Tools as t
+import json
 from Threads.HandleClientTCPSocket import HandleClientTCPSocket as hCTCPS
 from Threads.HandleServerConnection import HandleServerConnection as hSC
+from Threads.HandleToClientConnection import HandleToClientConnection as hTCC
+
 class Client:
     def __init__(self):
         # Attributes
@@ -36,11 +39,15 @@ class Client:
         self.hCTCPS = None
         self.udpSocket = None
         self.hSC = None
+        self.ports = []
+        self.username = None
 
         # Clients and Channels
-        self.clients = {}
         self.channels = {}
+        self.channelsSockets = {}
+        self.channelsMessages = {}
         self.currChannel = None
+        self.hasChannelChange = False
 
         self._gui = self.createGUI()
     def verifyPorts(self):
@@ -78,9 +85,9 @@ class Client:
             self.displayError('You are already connected to the server')
             return
 
-        ports = self.verifyPorts()
-        username = self.verifyUsername()
-        if ports and username:
+        self.ports = self.verifyPorts()
+        self.username = self.verifyUsername()
+        if self.ports and self.username:
             try:
                 serverAddrPort = ((self.serverAddrVar.get().strip() or 'null'), int(self.serverPortVar.get().strip() or 0))
                 self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
@@ -95,7 +102,7 @@ class Client:
                 self.serverConnectButton.config(state=tk.DISABLED)
                 self.serverDisconnectButton.config(state=tk.NORMAL)
 
-                self.startClientSockets(ports)
+                self.startClientSockets(self.ports)
 
     def disconnectFromServer(self):
         self.hSC.die()
@@ -137,7 +144,54 @@ class Client:
         self.hSC.createChannel(channelName)
 
     def setCurrChannel(self, data, socket):
-        self.currChannel = data['name']
+        channelName = data['name']
+
+        if not self.currChannel == channelName:
+            self.currChannel = data['name']
+            self.hasChannelChange = True
+            self.cleanMessages()
+        else:
+            self.currChannel = data['name']
+            self.hasChannelChange = True
+
+    def startPeers(self, data, socket):
+        # if self.hasChannelChange:
+        self.hasChannelChange = False
+        self.stopCurrPeers()
+        self.startNewPeers()
+
+    def stopCurrPeers(self):
+        print('On stop les anciens peers')
+        pass
+
+    def startNewPeers(self):
+        clients = self.channels[self.currChannel]['clients']
+        for client in clients:
+            if not self.isItMe(client):
+                toClient = client.copy()
+                try:
+                    toClientAddPort = (client['ip'], int(client['tcpPort']))
+                    socket = s.socket(s.AF_INET, s.SOCK_STREAM)
+
+                    toClient['socket'] = socket
+                    self.channelsSockets[self.currChannel] = []
+                    self.channelsSockets[self.currChannel].append(toClient)
+
+                    socket.connect(toClientAddPort)
+                    toClient['connection'] = hTCC(self, socket)
+                    toClient['connection'].start()
+                except Exception as e:
+                    print(e)
+                    self.displayError('Can\'t establish a connection to the client {}:{} : {}'.format(client['ip'], client['tcpPort'], str(e)))
+                else:
+                    print('OK on est connecte a {}'.format(toClient['username']))
+                    print(self.channelsSockets)
+
+
+    def isItMe(self, client):
+        if self.username == client['username'] and self.ports[0] == client['tcpPort']:
+            return True
+        return False
 
     def displayChannelList(self, data, socket):
         self.channels = data
@@ -150,6 +204,7 @@ class Client:
             if loop:
                 i += 1
                 if channelName == self.currChannel:
+                    print('currChannel = {}'.format(channelName))
                     loop = False
 
         print('currChannel = {}'.format(i))
@@ -170,9 +225,42 @@ class Client:
         self.usersList.delete(0, tk.END)
 
     def sendMessage(self):
-        pass
+        message = self.messageVar.get().strip()
+        if len(message) < 1:
+            return False
 
+        jsonMsg = json.dumps({
+            'action': 'incomingMessage',
+            'data': {
+                'username': self.username,
+                'channel': self.currChannel,
+                'message': message,
+                'tcpPort': self.ports[0]
+            }
+        })
 
+        if not self.currChannel in self.channelsMessages:
+            self.channelsMessages[self.currChannel] = []
+
+        self.channelsMessages[self.currChannel].append('<{}> : {}'.format(self.username, message))
+        self.displayMessages()
+
+        if self.currChannel in self.channelsSockets:
+            for client in self.channelsSockets[self.currChannel]:
+                client['connection'].sendTextMessage(jsonMsg)
+
+    def receiveMessage(self, data, socket):
+        if self.currChannel == data['channel']:
+            if not self.currChannel in self.channelsMessages:
+                self.channelsMessages[data['channel']] = []
+            self.channelsMessages[data['channel']].append('<{} {}:{}> : {}'.format(data['username'], socket.getpeername()[0], data['tcpPort'], data['message']))
+            self.displayMessages()
+
+    def displayMessages(self):
+        self.messagesList.insert(tk.END, self.channelsMessages[self.currChannel][-1])
+
+    def cleanMessages(self):
+        self.messagesList.delete(0, tk.END)
 
     # GUI
     def createGUI(self):

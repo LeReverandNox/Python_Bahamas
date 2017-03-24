@@ -3,7 +3,7 @@ import json
 from Threads.Ping import Ping
 import struct
 
-class HandleServerConnection(t.Thread):
+class HandleToClientConnection(t.Thread):
     def __init__(self, client, socket):
         t.Thread.__init__(self)
 
@@ -11,15 +11,13 @@ class HandleServerConnection(t.Thread):
         self.socket = socket
         self.isRunning = True
 
-        self.sayHello()
-
-        Ping(socket, self).start()
+        # Ping(socket, self).start()
 
     def stop(self):
         self.isRunning = False
 
     def die(self):
-        print('Lien rompu avec le serveur')
+        print('Lien rompu avec le client')
         self.stop()
 
     def parseMessage(self, byteMessage):
@@ -67,9 +65,9 @@ class HandleServerConnection(t.Thread):
         jsonMsg = json.dumps({
             'action': 'welcome',
             'data': {
-                'username': self.client.username,
-                'tcpPort': int(self.client.ports[0]),
-                'udpPort': int(self.client.ports[1])
+                'username': self.client.usernameVar.get(),
+                'tcpPort': int(self.client.tcpPortVar.get()),
+                'udpPort': int(self.client.udpPortVar.get())
             }
         })
         self.sendMessage(jsonMsg)
@@ -105,3 +103,6 @@ class HandleServerConnection(t.Thread):
         dataLength = len(data)
         self.socket.sendall(struct.pack('!I', dataLength))
         self.socket.sendall(data)
+
+    def sendTextMessage(self, data):
+        self.sendMessage(data)
