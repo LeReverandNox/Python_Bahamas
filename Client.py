@@ -45,8 +45,8 @@ class Client:
         self._gui = self.createGUI()
     def verifyPorts(self):
         try:
-            tcpPort = t.isPortValid(self.tcpPortVar.get(), 'tcp')
-            udpPort = t.isPortValid(self.udpPortVar.get(), 'udp')
+            tcpPort = t.isPortValid(self.tcpPortVar.get().strip(), 'tcp')
+            udpPort = t.isPortValid(self.udpPortVar.get().strip(), 'udp')
             if tcpPort == udpPort:
                 raise Exception('UDP and TCP port can\'t be identical.')
         except Exception as e:
@@ -56,7 +56,7 @@ class Client:
             return (tcpPort, udpPort)
 
     def verifyUsername(self):
-        username = self.usernameVar.get()
+        username = self.usernameVar.get().strip()
         if len(username) < 1:
             self.displayError('Please choose a username !')
             return False
@@ -82,7 +82,7 @@ class Client:
         username = self.verifyUsername()
         if ports and username:
             try:
-                serverAddrPort = ((self.serverAddrVar.get() or 'null'), int(self.serverPortVar.get() or 0))
+                serverAddrPort = ((self.serverAddrVar.get().strip() or 'null'), int(self.serverPortVar.get().strip() or 0))
                 self.serverSocket = s.socket(s.AF_INET, s.SOCK_STREAM)
                 self.serverSocket.connect(serverAddrPort)
                 self.hSC = hSC(self, self.serverSocket)
@@ -110,7 +110,20 @@ class Client:
         self.serverDisconnectButton.config(state=tk.DISABLED)
 
     def joinChannel(self):
-        pass
+        curSelec = self.channelList.curselection()
+        if not curSelec:
+            return False
+
+        channelIndex = curSelec[0]
+
+        i = -1
+        for channelName in self.channels:
+                i += 1
+                if i == channelIndex:
+                    break
+        self.currChannel = channelName
+        print(self.currChannel)
+        self.hSC.joinChannel(channelName)
 
     def createChannel(self):
         self.cleanInfo()
