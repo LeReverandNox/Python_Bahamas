@@ -155,7 +155,7 @@ class Server:
             return
 
         try:
-            port = t.isPortValid(self.serverPortVar.get())
+            port = t.isPortValid(self.serverPortVar.get(), 'server')
         except Exception as e:
             self.displayError(str(e))
         else:
@@ -221,6 +221,8 @@ class Server:
         client['tcpPort'] = data['tcpPort']
         client['udpPort'] = data['udpPort']
 
+        self.updateChannelListToClients()
+
         print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
         pp.pprint(self.channels)
         return client, self.clients
@@ -236,6 +238,8 @@ class Server:
             username = self.clients[socket]['username']
             del self.clients[socket]
             self.updateLoad()
+            self.updateChannelListToClients()
+
             print('Le client {} a ete supprime suite a sa deconnexion'.format(username))
             print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
             pp.pprint(self.channels)
@@ -255,6 +259,11 @@ class Server:
                 }
             }
             self.channels[name] = channel
+
+            self.setClientCurrChannel(socket, name)
+            if 'username' in client:
+                self.updateChannelListToClients()
+
             print('Le channel {} a ete cree'.format(name))
             print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
             pp.pprint(self.channels)
@@ -312,14 +321,34 @@ class Server:
                 user = self.clients[socket]
                 channel['clients'][socket] = user
 
+                self.setClientCurrChannel(socket, channelName)
+                self.updateChannelListToClients()
+
                 print('Le client {} a rejoint le channel {}'.format(user['username'], channelName))
                 print('{} : LES CHANNELS'.format(time.strftime("%H:%M:%S")))
                 pp.pprint(self.channels)
                 return True
+            self.setClientCurrChannel(socket, channelName)
+            self.updateChannelListToClients()
+            return False
         print('Le channel {} nexoste pas'.format(channelName))
         return False
 
-    def getChannelList(self, data, socket):
+    def setClientCurrChannel(self, socket, channel):
+        jsonMsg = json.dumps({
+            'action': 'setCurrChannel',
+            'error': False,
+            'data': {
+                'name': channel
+            }
+        })
+        self.sendMessage(socket, jsonMsg)
+
+    def updateChannelListToClients(self):
+        for socket in self.clients:
+            self.getChannelList(False, socket)
+
+    def getChannelList(self, data, toSocket):
         channels = {}
 
         for channelName in self.channels:
@@ -348,7 +377,7 @@ class Server:
             'data': channels
         })
 
-        self.sendMessage(socket, jsonMsg)
+        self.sendMessage(toSocket, jsonMsg)
 
     def sendMessage(self, socket, json):
         try:

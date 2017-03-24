@@ -10,8 +10,12 @@ class HandleSocket(t.Thread):
         self.isRunning = True
         self.lock = t.RLock()
 
+        self.connections = []
+
     def stop(self):
         self.isRunning = False
+        for connection in self.connections:
+            connection.die()
 
     def run(self):
         while self.isRunning:
@@ -20,6 +24,6 @@ class HandleSocket(t.Thread):
             except OSError:
                 pass
             else:
-                toto = hC(self.server, self.lock, clientSocket, clientIp)
-                toto.start()
-                # TODO: watch if socket is still alive (ping ?)
+                connection = hC(self.server, self.lock, clientSocket, clientIp)
+                connection.start()
+                self.connections.append(connection)
